@@ -1,5 +1,6 @@
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
+import Usuarios from './Usuarios'
 
 const Dashboard = () => {
   const { user, logout } = useAuth()
@@ -22,8 +23,7 @@ const Dashboard = () => {
         </div>
       </div>
       <div style={styles.content}>
-        <h3>Dashboard</h3>
-        <p>Módulos del sistema irán aquí...</p>
+        <Usuarios />
       </div>
     </div>
   )
