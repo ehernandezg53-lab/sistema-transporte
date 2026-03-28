@@ -6,6 +6,8 @@ const Dashboard = () => {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
 
+  const esAdmin = user?.rol?.nombre_rol === 'Administrador'
+
   const handleLogout = () => {
     logout()
     navigate('/login')
@@ -23,7 +25,15 @@ const Dashboard = () => {
         </div>
       </div>
       <div style={styles.content}>
-        <Usuarios />
+        {esAdmin ? (
+          <Usuarios />
+        ) : (
+          <div style={styles.sinModulo}>
+            <h3>Bienvenido, {user?.nombre}</h3>
+            <p>Tu rol es: <strong>{user?.rol?.nombre_rol}</strong></p>
+            <p>Los módulos de tu rol estarán disponibles próximamente.</p>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -63,6 +73,13 @@ const styles = {
   },
   content: {
     padding: '32px',
+  },
+  sinModulo: {
+    backgroundColor: '#fff',
+    padding: '32px',
+    borderRadius: '12px',
+    boxShadow: '0 2px 10px rgba(0,0,0,0.08)',
+    textAlign: 'center',
   },
 }
 
