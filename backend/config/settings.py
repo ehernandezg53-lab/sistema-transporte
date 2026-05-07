@@ -22,6 +22,8 @@ INSTALLED_APPS = [
 
     'apps.users',
     'apps.bodega',
+    'apps.taller',
+    'apps.transporte',
 ]
 
 MIDDLEWARE = [
