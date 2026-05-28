@@ -12,30 +12,27 @@ const estadoClass = {
 const Taller = () => {
   const [ordenes, setOrdenes] = useState([])
   const [mantenimientos, setMantenimientos] = useState([])
-  const [repuestos, setRepuestos] = useState([])
   const [vehiculos, setVehiculos] = useState([])
   const [mecanicos, setMecanicos] = useState([])
-  const [repuestosDisponibles, setRepuestosDisponibles] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [vistaActual, setVistaActual] = useState('ordenes')
+  
   const [showModalOrden, setShowModalOrden] = useState(false)
   const [showModalMantenimiento, setShowModalMantenimiento] = useState(false)
-  const [showModalRepuesto, setShowModalRepuesto] = useState(false)
+  const [showModalMecanico, setShowModalMecanico] = useState(false)
   const [ordenEditando, setOrdenEditando] = useState(null)
+  const [mecanicoEditando, setMecanicoEditando] = useState(null)
 
+  // Forms
   const [formOrden, setFormOrden] = useState({
-    estado: 'pendiente',
-    descripcion: '',
-    area: 'mecanica_general',
-    vehiculo_id: '',
-    mecanico_id: '',
+    descripcion: '', area: 'mecanica_general', vehiculo_id: '', mecanico_id: '', estado: 'pendiente'
   })
   const [formMantenimiento, setFormMantenimiento] = useState({
     orden: '', tipo_mantenimiento: 'preventivo', fecha: '', lugar: ''
   })
-  const [formRepuesto, setFormRepuesto] = useState({
-    mantenimiento: '', repuesto_id: '', cantidad: ''
+  const [formMecanico, setFormMecanico] = useState({
+    nombre: '', telefono: '', especialidad: '', estado: 'activo'
   })
 
   useEffect(() => {
@@ -44,18 +41,14 @@ const Taller = () => {
 
   const cargarDatos = async () => {
     try {
-      const [ordenesRes, mantenimientosRes, repuestosRes, repuestosDispRes, vehiculosRes, mecanicosRes] = await Promise.all([
+      const [ordenesRes, mantenimientosRes, vehiculosRes, mecanicosRes] = await Promise.all([
         api.get('/taller/ordenes/'),
         api.get('/taller/mantenimientos/'),
-        api.get('/taller/repuestos/'),
-        api.get('/bodega/repuestos/'),
         api.get('/transporte/vehiculos/'),
-        api.get('/transporte/conductores/'),
+        api.get('/taller/mecanicos/'),
       ])
       setOrdenes(ordenesRes.data)
       setMantenimientos(mantenimientosRes.data)
-      setRepuestos(repuestosRes.data)
-      setRepuestosDisponibles(repuestosDispRes.data)
       setVehiculos(vehiculosRes.data)
       setMecanicos(mecanicosRes.data)
     } catch (err) {
@@ -74,7 +67,7 @@ const Taller = () => {
       }
       setShowModalOrden(false)
       setOrdenEditando(null)
-      setFormOrden({ estado: 'pendiente', descripcion: '', area: 'mecanica_general', vehiculo_id: '', mecanico_id: '' })
+      setFormOrden({ descripcion: '', area: 'mecanica_general', vehiculo_id: '', mecanico_id: '', estado: 'pendiente' })
       cargarDatos()
     } catch (err) {
       setError('Error al guardar la orden')
@@ -92,32 +85,48 @@ const Taller = () => {
     }
   }
 
-  const handleSubmitRepuesto = async () => {
+  const handleSubmitMecanico = async () => {
     try {
-      await api.post('/taller/repuestos/', formRepuesto)
-      setShowModalRepuesto(false)
-      setFormRepuesto({ mantenimiento: '', repuesto_id: '', cantidad: '' })
+      if (mecanicoEditando) {
+        await api.put(`/taller/mecanicos/${mecanicoEditando.id}/`, formMecanico)
+      } else {
+        await api.post('/taller/mecanicos/', formMecanico)
+      }
+      setShowModalMecanico(false)
+      setMecanicoEditando(null)
+      setFormMecanico({ nombre: '', telefono: '', especialidad: '', estado: 'activo' })
       cargarDatos()
     } catch (err) {
-      setError('Error al registrar el repuesto. Verifique el stock.')
+      setError('Error al guardar el mecánico')
     }
   }
 
   const handleEditarOrden = (orden) => {
     setOrdenEditando(orden)
     setFormOrden({
-      estado: orden.estado,
       descripcion: orden.descripcion || '',
       area: orden.area,
-      vehiculo_id: orden.vehiculo_id || '',
-      mecanico_id: orden.mecanico_id || '',
+      estado: orden.estado,
+      vehiculo_id: orden.vehiculo_id ?? '',
+      mecanico_id: orden.mecanico_id ?? '',
     })
     setShowModalOrden(true)
   }
 
+  const handleEditarMecanico = (mecanico) => {
+    setMecanicoEditando(mecanico)
+    setFormMecanico({
+      nombre: mecanico.nombre,
+      telefono: mecanico.telefono || '',
+      especialidad: mecanico.especialidad || '',
+      estado: mecanico.estado,
+    })
+    setShowModalMecanico(true)
+  }
+
   const handleNuevaOrden = () => {
     setOrdenEditando(null)
-    setFormOrden({ estado: 'pendiente', descripcion: '', area: 'mecanica_general', vehiculo_id: '', mecanico_id: '' })
+    setFormOrden({ descripcion: '', area: 'mecanica_general', vehiculo_id: '', mecanico_id: '', estado: 'pendiente' })
     setShowModalOrden(true)
   }
 
@@ -131,13 +140,13 @@ const Taller = () => {
 
       <div className="taller-tabs">
         <button className={vistaActual === 'ordenes' ? 'taller-tab-activo' : 'taller-tab'} onClick={() => setVistaActual('ordenes')}>
-          Órdenes de Trabajo
+          📋 Órdenes de Trabajo
         </button>
         <button className={vistaActual === 'mantenimientos' ? 'taller-tab-activo' : 'taller-tab'} onClick={() => setVistaActual('mantenimientos')}>
-          Mantenimientos
+          🔧 Mantenimientos
         </button>
-        <button className={vistaActual === 'repuestos' ? 'taller-tab-activo' : 'taller-tab'} onClick={() => setVistaActual('repuestos')}>
-          Repuestos Usados
+        <button className={vistaActual === 'mecanicos' ? 'taller-tab-activo' : 'taller-tab'} onClick={() => setVistaActual('mecanicos')}>
+          👨‍🔧 Mecánicos
         </button>
       </div>
 
@@ -163,7 +172,7 @@ const Taller = () => {
             <tbody>
               {ordenes.map((orden) => (
                 <tr key={orden.id} className="taller-tr">
-                  <td className="taller-td">#{orden.id}</td>
+                  <td className="taller-td"><strong>{orden.numero_orden}</strong></td>
                   <td className="taller-td">{orden.fecha_creacion}</td>
                   <td className="taller-td">{orden.vehiculo_placa || '-'}</td>
                   <td className="taller-td">{orden.mecanico_nombre || '-'}</td>
@@ -213,28 +222,38 @@ const Taller = () => {
         </>
       )}
 
-      {vistaActual === 'repuestos' && (
+      {vistaActual === 'mecanicos' && (
         <>
           <div className="taller-header">
-            <h3 className="taller-subtitle">Repuestos Utilizados</h3>
-            <button className="taller-btn-nuevo" onClick={() => setShowModalRepuesto(true)}>+ Registrar Repuesto</button>
+            <h3 className="taller-subtitle">Mecánicos</h3>
+            <button className="taller-btn-nuevo" onClick={() => { setMecanicoEditando(null); setFormMecanico({ nombre: '', telefono: '', especialidad: '', estado: 'activo' }); setShowModalMecanico(true) }}>
+              + Nuevo Mecánico
+            </button>
           </div>
           <table className="taller-table">
             <thead>
               <tr>
-                <th className="taller-th">Mantenimiento</th>
-                <th className="taller-th">Repuesto</th>
-                <th className="taller-th">Cantidad</th>
-                <th className="taller-th">Fecha</th>
+                <th className="taller-th">Nombre</th>
+                <th className="taller-th">Teléfono</th>
+                <th className="taller-th">Especialidad</th>
+                <th className="taller-th">Estado</th>
+                <th className="taller-th">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {repuestos.map((r) => (
-                <tr key={r.id} className="taller-tr">
-                  <td className="taller-td">#{r.mantenimiento}</td>
-                  <td className="taller-td">{r.repuesto_nombre}</td>
-                  <td className="taller-td">{r.cantidad}</td>
-                  <td className="taller-td">{r.fecha}</td>
+              {mecanicos.map((m) => (
+                <tr key={m.id} className="taller-tr">
+                  <td className="taller-td">{m.nombre}</td>
+                  <td className="taller-td">{m.telefono || '-'}</td>
+                  <td className="taller-td">{m.especialidad || '-'}</td>
+                  <td className="taller-td">
+                    <span className={m.estado === 'activo' ? 'estado-finalizada' : 'estado-cancelada'}>
+                      {m.estado}
+                    </span>
+                  </td>
+                  <td className="taller-td">
+                    <button className="btn-editar" onClick={() => handleEditarMecanico(m)}>Editar</button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -242,11 +261,11 @@ const Taller = () => {
         </>
       )}
 
+      {/* Modals */}
       {showModalOrden && (
         <div className="overlay">
           <div className="modal">
             <h3 className="modal-title">{ordenEditando ? 'Editar Orden' : 'Nueva Orden de Trabajo'}</h3>
-
             <div className="field">
               <label className="field-label">Vehículo</label>
               <select className="field-input" value={formOrden.vehiculo_id} onChange={(e) => setFormOrden({ ...formOrden, vehiculo_id: e.target.value })}>
@@ -256,7 +275,6 @@ const Taller = () => {
                 ))}
               </select>
             </div>
-
             <div className="field">
               <label className="field-label">Mecánico</label>
               <select className="field-input" value={formOrden.mecanico_id} onChange={(e) => setFormOrden({ ...formOrden, mecanico_id: e.target.value })}>
@@ -266,7 +284,6 @@ const Taller = () => {
                 ))}
               </select>
             </div>
-
             <div className="field">
               <label className="field-label">Área</label>
               <select className="field-input" value={formOrden.area} onChange={(e) => setFormOrden({ ...formOrden, area: e.target.value })}>
@@ -277,22 +294,21 @@ const Taller = () => {
                 <option value="mecanica_general">Mecánica General</option>
               </select>
             </div>
-
-            <div className="field">
-              <label className="field-label">Estado</label>
-              <select className="field-input" value={formOrden.estado} onChange={(e) => setFormOrden({ ...formOrden, estado: e.target.value })}>
-                <option value="pendiente">Pendiente</option>
-                <option value="en_proceso">En Proceso</option>
-                <option value="finalizada">Finalizada</option>
-                <option value="cancelada">Cancelada</option>
-              </select>
-            </div>
-
+            {ordenEditando && (
+              <div className="field">
+                <label className="field-label">Estado</label>
+                <select className="field-input" value={formOrden.estado} onChange={(e) => setFormOrden({ ...formOrden, estado: e.target.value })}>
+                  <option value="pendiente">Pendiente</option>
+                  <option value="en_proceso">En Proceso</option>
+                  <option value="finalizada">Finalizada</option>
+                  <option value="cancelada">Cancelada</option>
+                </select>
+              </div>
+            )}
             <div className="field">
               <label className="field-label">Descripción</label>
               <textarea className="field-input" value={formOrden.descripcion} onChange={(e) => setFormOrden({ ...formOrden, descripcion: e.target.value })} placeholder="Descripción de la orden" />
             </div>
-
             <div className="modal-buttons">
               <button className="btn-cancelar" onClick={() => setShowModalOrden(false)}>Cancelar</button>
               <button className="btn-guardar" onClick={handleSubmitOrden}>Guardar</button>
@@ -310,7 +326,7 @@ const Taller = () => {
               <select className="field-input" value={formMantenimiento.orden} onChange={(e) => setFormMantenimiento({ ...formMantenimiento, orden: e.target.value })}>
                 <option value="">Selecciona una orden</option>
                 {ordenes.map((o) => (
-                  <option key={o.id} value={o.id}>#{o.id} - {o.estado}</option>
+                  <option key={o.id} value={o.id}>{o.numero_orden} - {o.estado}</option>
                 ))}
               </select>
             </div>
@@ -337,39 +353,37 @@ const Taller = () => {
         </div>
       )}
 
-      {showModalRepuesto && (
+      {showModalMecanico && (
         <div className="overlay">
           <div className="modal">
-            <h3 className="modal-title">Registrar Repuesto Utilizado</h3>
+            <h3 className="modal-title">{mecanicoEditando ? 'Editar Mecánico' : 'Nuevo Mecánico'}</h3>
             <div className="field">
-              <label className="field-label">Mantenimiento</label>
-              <select className="field-input" value={formRepuesto.mantenimiento} onChange={(e) => setFormRepuesto({ ...formRepuesto, mantenimiento: e.target.value })}>
-                <option value="">Selecciona un mantenimiento</option>
-                {mantenimientos.map((m) => (
-                  <option key={m.id} value={m.id}>#{m.id} - {m.tipo_mantenimiento} - {m.lugar}</option>
-                ))}
-              </select>
+              <label className="field-label">Nombre</label>
+              <input className="field-input" value={formMecanico.nombre} onChange={(e) => setFormMecanico({ ...formMecanico, nombre: e.target.value })} placeholder="Nombre del mecánico" />
             </div>
             <div className="field">
-              <label className="field-label">Repuesto</label>
-              <select className="field-input" value={formRepuesto.repuesto_id} onChange={(e) => setFormRepuesto({ ...formRepuesto, repuesto_id: e.target.value })}>
-                <option value="">Selecciona un repuesto</option>
-                {repuestosDisponibles.map((r) => (
-                  <option key={r.id} value={r.id}>{r.nombre} (Stock: {r.stock})</option>
-                ))}
-              </select>
+              <label className="field-label">Teléfono</label>
+              <input className="field-input" value={formMecanico.telefono} onChange={(e) => setFormMecanico({ ...formMecanico, telefono: e.target.value })} placeholder="Teléfono" />
             </div>
             <div className="field">
-              <label className="field-label">Cantidad</label>
-              <input className="field-input" type="number" value={formRepuesto.cantidad} onChange={(e) => setFormRepuesto({ ...formRepuesto, cantidad: e.target.value })} placeholder="Cantidad utilizada" />
+              <label className="field-label">Especialidad</label>
+              <input className="field-input" value={formMecanico.especialidad} onChange={(e) => setFormMecanico({ ...formMecanico, especialidad: e.target.value })} placeholder="Especialidad" />
+            </div>
+            <div className="field">
+              <label className="field-label">Estado</label>
+              <select className="field-input" value={formMecanico.estado} onChange={(e) => setFormMecanico({ ...formMecanico, estado: e.target.value })}>
+                <option value="activo">Activo</option>
+                <option value="inactivo">Inactivo</option>
+              </select>
             </div>
             <div className="modal-buttons">
-              <button className="btn-cancelar" onClick={() => setShowModalRepuesto(false)}>Cancelar</button>
-              <button className="btn-guardar" onClick={handleSubmitRepuesto}>Guardar</button>
+              <button className="btn-cancelar" onClick={() => setShowModalMecanico(false)}>Cancelar</button>
+              <button className="btn-guardar" onClick={handleSubmitMecanico}>Guardar</button>
             </div>
           </div>
         </div>
       )}
+
     </div>
   )
 }

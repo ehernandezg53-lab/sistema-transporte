@@ -5,6 +5,8 @@ import Usuarios from './usuarios/Usuarios'
 import Bodega from './bodega/Bodega'
 import Taller from './taller/Taller'
 import Transporte from './transporte/Transporte'
+import Reportes from './reportes/Reportes'
+
 
 const Dashboard = () => {
   const { user, logout } = useAuth()
@@ -23,9 +25,10 @@ const Dashboard = () => {
 
   const menuAdmin = [
     { id: 'usuarios', label: '👥 Gestión de Usuarios' },
-    { id: 'bodega', label: '📦 Bodega de Repuestos' },
+    { id: 'bodega', label: '📦 Gestión de Bodega' },
     { id: 'taller', label: '🔧 Gestión de Taller' },
     { id: 'transporte', label: '🚛 Gestión de Transporte' },
+    { id: 'reportes', label: '📊 Panel de Reportes' },
   ]
 
   const renderModulo = () => {
@@ -34,6 +37,8 @@ const Dashboard = () => {
       if (moduloActual === 'bodega') return <Bodega />
       if (moduloActual === 'taller') return <Taller />
       if (moduloActual === 'transporte') return <Transporte />
+      if (moduloActual === 'reportes') return <Reportes />
+
       return (
         <div style={styles.bienvenida}>
           <h2>Bienvenido, {user?.nombre} 👋</h2>

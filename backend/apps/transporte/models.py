@@ -65,6 +65,7 @@ class Entrega(models.Model):
     ]
 
     ruta = models.ForeignKey(Ruta, on_delete=models.CASCADE, related_name='entregas')
+    rollo = models.ForeignKey('bodega.Rollo', on_delete=models.CASCADE, related_name='entregas', null=True, blank=True)
     cantidad = models.IntegerField()
     estado_entrega = models.CharField(max_length=20, choices=ESTADOS, default='pendiente')
 
@@ -72,4 +73,4 @@ class Entrega(models.Model):
         db_table = 'entrega'
 
     def __str__(self):
-        return f'Entrega ruta #{self.ruta.id}'
+        return f'Entrega ruta #{self.ruta.id}'

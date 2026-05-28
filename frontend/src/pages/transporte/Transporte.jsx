@@ -10,12 +10,22 @@ const Transporte = () => {
   const [error, setError] = useState('')
   const [vistaActual, setVistaActual] = useState('vehiculos')
   const [showModal, setShowModal] = useState(false)
+  const [showModalEntregas, setShowModalEntregas] = useState(false)
+  
   const [editando, setEditando] = useState(null)
+  const [rutaParaEntregas, setRutaParaEntregas] = useState(null)
+  const [entregasRuta, setEntregasRuta] = useState([])
+  const [rollosDisponibles, setRollosDisponibles] = useState([])
+  const [rollosRuta, setRollosRuta] = useState([])
 
+  // Forms
   const [formVehiculo, setFormVehiculo] = useState({ placa: '', estado: 'activo' })
   const [formConductor, setFormConductor] = useState({ nombre: '', telefono: '', estado: 'activo' })
   const [formRuta, setFormRuta] = useState({
-    destino: '', fecha_salida: '', fecha_entrega: '', estado: 'pendiente', vehiculo_id: '', conductor_id: ''
+    destino: '', fecha_salida: '', fecha_entrega: '', estado: 'pendiente', vehiculo_id: '', conductor_id: '', rollo_id: ''
+  })
+  const [formEntrega, setFormEntrega] = useState({
+    rollo_id: '', cantidad: ''
   })
 
   useEffect(() => {
@@ -73,21 +83,36 @@ const Transporte = () => {
 
   const handleSubmitRuta = async () => {
     try {
+      setError('')
+      const payload = { ...formRuta }
+      if (!payload.rollo_id) delete payload.rollo_id
+      if (!payload.vehiculo_id) delete payload.vehiculo_id
+      if (!payload.conductor_id) delete payload.conductor_id
       if (editando) {
-        await api.put(`/transporte/rutas/${editando.id}/`, formRuta)
+        await api.put(`/transporte/rutas/${editando.id}/`, payload)
       } else {
-        await api.post('/transporte/rutas/', formRuta)
+        await api.post('/transporte/rutas/', payload)
       }
       setShowModal(false)
       setEditando(null)
-      setFormRuta({ destino: '', fecha_salida: '', fecha_entrega: '', estado: 'pendiente', vehiculo_id: '', conductor_id: '' })
+      setFormRuta({ destino: '', fecha_salida: '', fecha_entrega: '', estado: 'pendiente', vehiculo_id: '', conductor_id: '', rollo_id: '' })
       cargarDatos()
     } catch (err) {
-      setError('Error al guardar la ruta')
+      if (err.response?.data && typeof err.response.data === 'object') {
+        const errors = err.response.data
+        const msgs = Object.keys(errors).map(key => {
+          const fieldName = key === 'non_field_errors' ? 'Error' : key
+          const val = errors[key]
+          return `${fieldName}: ${Array.isArray(val) ? val.join(', ') : val}`
+        })
+        setError(msgs.join(' | '))
+      } else {
+        setError('Error al guardar la ruta. Verifique los datos.')
+      }
     }
   }
 
-  const handleEditar = (item) => {
+  const handleEditar = async (item) => {
     setEditando(item)
     if (vistaActual === 'vehiculos') {
       setFormVehiculo({ placa: item.placa, estado: item.estado })
@@ -101,16 +126,37 @@ const Transporte = () => {
         estado: item.estado,
         vehiculo_id: item.vehiculo_id || '',
         conductor_id: item.conductor_id || '',
+        rollo_id: item.rollo_info?.id || '',
       })
+      try {
+        const rollosRes = await api.get('/bodega/rollos/')
+        const activos = rollosRes.data.filter(r => r.estado === 'activo')
+        const rolloActual = item.rollo_info
+        if (rolloActual && !activos.some(r => r.id === rolloActual.id)) {
+          activos.push({
+            id: rolloActual.id,
+            peso: rolloActual.peso,
+            estado: rolloActual.estado,
+            ubicacion_nombre: 'Asignado a esta ruta'
+          })
+        }
+        setRollosRuta(activos)
+      } catch {}
     }
     setShowModal(true)
   }
 
-  const handleNuevo = () => {
+  const handleNuevo = async () => {
     setEditando(null)
     if (vistaActual === 'vehiculos') setFormVehiculo({ placa: '', estado: 'activo' })
     else if (vistaActual === 'conductores') setFormConductor({ nombre: '', telefono: '', estado: 'activo' })
-    else if (vistaActual === 'rutas') setFormRuta({ destino: '', fecha_salida: '', fecha_entrega: '', estado: 'pendiente', vehiculo_id: '', conductor_id: '' })
+    else if (vistaActual === 'rutas') {
+      setFormRuta({ destino: '', fecha_salida: '', fecha_entrega: '', estado: 'pendiente', vehiculo_id: '', conductor_id: '', rollo_id: '' })
+      try {
+        const rollosRes = await api.get('/bodega/rollos/')
+        setRollosRuta(rollosRes.data.filter(r => r.estado === 'activo'))
+      } catch {}
+    }
     setShowModal(true)
   }
 
@@ -118,6 +164,49 @@ const Transporte = () => {
     if (vistaActual === 'vehiculos') handleSubmitVehiculo()
     else if (vistaActual === 'conductores') handleSubmitConductor()
     else if (vistaActual === 'rutas') handleSubmitRuta()
+  }
+
+  const handleAbrirEntregas = async (ruta) => {
+    setRutaParaEntregas(ruta)
+    setFormEntrega({ rollo_id: '', cantidad: '' })
+    try {
+      const [rollosRes, entregasRes] = await Promise.all([
+        api.get('/bodega/rollos/'),
+        api.get('/transporte/entregas/')
+      ])
+      // Filtrar solo los rollos activos en bodega
+      setRollosDisponibles(rollosRes.data.filter(r => r.estado === 'activo'))
+      // Filtrar las entregas que corresponden a esta ruta
+      setEntregasRuta(entregasRes.data.filter(e => e.ruta === ruta.id))
+      setShowModalEntregas(true)
+    } catch (err) {
+      setError('Error al cargar datos de entregas')
+    }
+  }
+
+  const handleSubmitEntrega = async () => {
+    try {
+      await api.post('/transporte/entregas/', {
+        ruta: rutaParaEntregas.id,
+        rollo_id: formEntrega.rollo_id,
+        cantidad: formEntrega.cantidad,
+        estado_entrega: 'pendiente'
+      })
+      alert('Entrega de rollo añadida correctamente a la ruta!')
+      
+      // Recargar entregas
+      const entregasRes = await api.get('/transporte/entregas/')
+      setEntregasRuta(entregasRes.data.filter(e => e.ruta === rutaParaEntregas.id))
+      
+      // Recargar rollos disponibles
+      const rollosRes = await api.get('/bodega/rollos/')
+      setRollosDisponibles(rollosRes.data.filter(r => r.estado === 'activo'))
+      
+      setFormEntrega({ rollo_id: '', cantidad: '' })
+      cargarDatos()
+    } catch (err) {
+      setError('Error al registrar la entrega. Verifique que el rollo esté disponible.')
+    }
   }
 
   if (loading) return <p className="transporte-loading">Cargando...</p>
@@ -239,6 +328,12 @@ const Transporte = () => {
                   </td>
                   <td className="transporte-td">
                     <button className="btn-editar" onClick={() => handleEditar(r)}>Editar</button>
+                    <button 
+                      style={{ padding: '6px 12px', backgroundColor: '#6366f1', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', marginLeft: '6px' }}
+                      onClick={() => handleAbrirEntregas(r)}
+                    >
+                      📦 Entregas
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -301,8 +396,8 @@ const Transporte = () => {
                   <label className="field-label">Vehículo</label>
                   <select className="field-input" value={formRuta.vehiculo_id} onChange={(e) => setFormRuta({ ...formRuta, vehiculo_id: e.target.value })}>
                     <option value="">Selecciona un vehículo</option>
-                    {vehiculos.filter(v => v.estado === 'activo').map((v) => (
-                      <option key={v.id} value={v.id}>{v.placa}</option>
+                    {vehiculos.filter(v => v.estado === 'activo' || v.id === Number(formRuta.vehiculo_id)).map((v) => (
+                      <option key={v.id} value={v.id}>{v.placa} {v.estado !== 'activo' ? `(${v.estado})` : ''}</option>
                     ))}
                   </select>
                 </div>
@@ -310,8 +405,8 @@ const Transporte = () => {
                   <label className="field-label">Conductor</label>
                   <select className="field-input" value={formRuta.conductor_id} onChange={(e) => setFormRuta({ ...formRuta, conductor_id: e.target.value })}>
                     <option value="">Selecciona un conductor</option>
-                    {conductores.filter(c => c.estado === 'activo').map((c) => (
-                      <option key={c.id} value={c.id}>{c.nombre}</option>
+                    {conductores.filter(c => c.estado === 'activo' || c.id === Number(formRuta.conductor_id)).map((c) => (
+                      <option key={c.id} value={c.id}>{c.nombre} {c.estado !== 'activo' ? `(${c.estado})` : ''}</option>
                     ))}
                   </select>
                 </div>
@@ -332,12 +427,101 @@ const Transporte = () => {
                     <option value="cancelada">Cancelada</option>
                   </select>
                 </div>
+                <div className="field">
+                  <label className="field-label">Rollo a Asignar <span style={{fontSize:'12px',color:'#888'}}>(opcional — se registra salida automáticamente)</span></label>
+                  <select className="field-input" value={formRuta.rollo_id} onChange={(e) => setFormRuta({ ...formRuta, rollo_id: e.target.value })}>
+                    <option value="">Sin rollo asignado</option>
+                    {rollosRuta.map((r) => (
+                      <option key={r.id} value={r.id}>Rollo #{r.id} — {r.peso} kg ({r.ubicacion_nombre || 'Sin ubicación'})</option>
+                    ))}
+                  </select>
+                  {rollosRuta.length === 0 && (
+                    <small style={{color:'#dc3545'}}>No hay rollos activos en bodega.</small>
+                  )}
+                </div>
               </>
             )}
 
             <div className="modal-buttons">
               <button className="btn-cancelar" onClick={() => setShowModal(false)}>Cancelar</button>
               <button className="btn-guardar" onClick={handleSubmit}>Guardar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showModalEntregas && (
+        <div className="overlay">
+          <div className="modal" style={{ maxWidth: '600px' }}>
+            <h3 className="modal-title">📦 Entregas de Ruta a {rutaParaEntregas?.destino}</h3>
+            
+            <div style={{ maxHeight: '200px', overflowY: 'auto', marginBottom: '20px' }}>
+              <table className="transporte-table" style={{ fontSize: '13px' }}>
+                <thead>
+                  <tr>
+                    <th className="transporte-th">Rollo</th>
+                    <th className="transporte-th">Peso</th>
+                    <th className="transporte-th">Cantidad</th>
+                    <th className="transporte-th">Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {entregasRuta.length === 0 ? (
+                    <tr>
+                      <td className="transporte-td" colSpan="4" style={{ textAlign: 'center' }}>No hay entregas registradas en esta ruta.</td>
+                    </tr>
+                  ) : (
+                    entregasRuta.map((e) => (
+                      <tr key={e.id} className="transporte-tr">
+                        <td className="transporte-td">Rollo #{e.rollo_id}</td>
+                        <td className="transporte-td">{e.rollo_peso} kg</td>
+                        <td className="transporte-td">{e.cantidad}</td>
+                        <td className="transporte-td"><span className="estado-activo" style={{ padding: '2px 8px', borderRadius: '10px', fontSize: '11px' }}>{e.estado_entrega}</span></td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {rutaParaEntregas?.estado !== 'finalizada' && rutaParaEntregas?.estado !== 'cancelada' && (
+              <div style={{ borderTop: '1px solid #eee', paddingTop: '16px' }}>
+                <h4>+ Añadir Entrega de Rollo</h4>
+                <div className="field">
+                  <label className="field-label">Seleccionar Rollo Disponible en Bodega</label>
+                  <select 
+                    className="field-input" 
+                    value={formEntrega.rollo_id}
+                    onChange={(e) => setFormEntrega({ ...formEntrega, rollo_id: e.target.value })}
+                  >
+                    <option value="">Seleccionar rollo</option>
+                    {rollosDisponibles.map((r) => (
+                      <option key={r.id} value={r.id}>Rollo #{r.id} ({r.peso} kg)</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="field">
+                  <label className="field-label">Cantidad a Entregar</label>
+                  <input 
+                    className="field-input" 
+                    type="number"
+                    value={formEntrega.cantidad}
+                    onChange={(e) => setFormEntrega({ ...formEntrega, cantidad: e.target.value })}
+                    placeholder="Ej. 1" 
+                  />
+                </div>
+                <button 
+                  className="btn-guardar" 
+                  style={{ width: '100%' }}
+                  onClick={handleSubmitEntrega}
+                >
+                  Registrar Entrega
+                </button>
+              </div>
+            )}
+
+            <div className="modal-buttons" style={{ marginTop: '20px' }}>
+              <button className="btn-cancelar" onClick={() => setShowModalEntregas(false)}>Cerrar</button>
             </div>
           </div>
         </div>

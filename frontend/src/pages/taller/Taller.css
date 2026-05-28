@@ -27,3 +27,15 @@
 .btn-guardar { padding: 10px 20px; background-color: #1a1a2e; color: #fff; border: none; border-radius: 8px; cursor: pointer; }
 .btn-editar { margin-right: 8px; padding: 6px 12px; background-color: #f0ad4e; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
 .btn-ver { padding: 6px 12px; background-color: #17a2b8; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+.taller-buscar { padding: 16px 0; }
+.taller-buscar-form { display: flex; gap: 12px; margin: 16px 0; }
+.taller-buscar-input { padding: 10px 14px; border-radius: 8px; border: 1px solid #ddd; font-size: 14px; width: 300px; }
+.taller-orden-detalle { background: #fff; border-radius: 12px; padding: 24px; margin-top: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+.taller-orden-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+.taller-orden-header h3 { margin: 0 0 8px 0; color: #1a1a2e; }
+.taller-orden-fecha { color: #666; font-size: 13px; }
+.taller-orden-info { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.taller-orden-campo { display: flex; flex-direction: column; gap: 4px; }
+.taller-orden-label { font-size: 12px; color: #999; font-weight: 500; text-transform: uppercase; }
+.taller-orden-seccion { color: #1a1a2e; margin: 20px 0 12px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+.taller-sin-repuestos { color: #999; font-size: 14px; text-align: center; padding: 16px; }

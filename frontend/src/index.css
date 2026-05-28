@@ -55,8 +55,8 @@ body {
 }
 
 #root {
-  width: 1126px;
-  max-width: 100%;
+  width: 100%;
+  max-width: 1440px;
   margin: 0 auto;
   text-align: center;
   border-inline: 1px solid var(--border);
@@ -109,3 +109,20 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+/* Soporte responsivo de tablas para todos los navegadores */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+@media (max-width: 1200px) {
+  table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
+  }
+}
+
