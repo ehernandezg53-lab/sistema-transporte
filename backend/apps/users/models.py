@@ -42,9 +42,10 @@ class UsuarioManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, correo, nombre, password=None, **extra_fields):
+    def create_superuser(self, correo, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
+        nombre = extra_fields.pop('nombre', 'Administrador')
         return self.create_user(correo, nombre, password, **extra_fields)
 
 
