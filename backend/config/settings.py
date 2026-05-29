@@ -77,7 +77,10 @@ REST_FRAMEWORK = {
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "https://sistema-transporte-kappa.vercel.app",
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 
 AUTH_USER_MODEL = 'users.Usuario'
