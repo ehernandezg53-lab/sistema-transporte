@@ -30,7 +30,7 @@ const Login = () => {
 
   return (
     <div style={styles.container}>
-      <div style={styles.card}>
+      <div className="spotify-card" style={styles.card}>
         <h2 style={styles.title}>Sistema de Transporte</h2>
         <p style={styles.subtitle}>Inicia sesión para continuar</p>
 
@@ -38,9 +38,9 @@ const Login = () => {
 
         <form onSubmit={handleSubmit}>
           <div style={styles.field}>
-            <label style={styles.label}>Correo</label>
+            <label style={styles.label}>Correo electrónico</label>
             <input
-              style={styles.input}
+              className="spotify-input"
               type="email"
               value={correo}
               onChange={(e) => setCorreo(e.target.value)}
@@ -52,7 +52,7 @@ const Login = () => {
           <div style={styles.field}>
             <label style={styles.label}>Contraseña</label>
             <input
-              style={styles.input}
+              className="spotify-input"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -61,7 +61,7 @@ const Login = () => {
             />
           </div>
 
-          <button style={styles.button} type="submit" disabled={loading}>
+          <button className="spotify-btn" type="submit" disabled={loading} style={{ width: '100%', marginTop: '8px' }}>
             {loading ? 'Ingresando...' : 'Ingresar'}
           </button>
         </form>
@@ -76,62 +76,46 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f0f2f5',
+    backgroundColor: 'var(--bg)',
   },
   card: {
-    backgroundColor: '#fff',
-    padding: '40px',
-    borderRadius: '12px',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
     width: '100%',
     maxWidth: '400px',
   },
   title: {
     textAlign: 'center',
     marginBottom: '8px',
-    color: '#1a1a2e',
-    fontSize: '24px',
+    color: 'var(--text-h)',
+    fontSize: '28px',
+    fontWeight: '700',
+    letterSpacing: '-0.5px',
   },
   subtitle: {
     textAlign: 'center',
-    color: '#666',
+    color: 'var(--text)',
     marginBottom: '24px',
+    fontSize: '14px',
   },
   field: {
-    marginBottom: '16px',
+    marginBottom: '20px',
+    textAlign: 'left',
   },
   label: {
     display: 'block',
-    marginBottom: '6px',
-    color: '#333',
-    fontWeight: '500',
-  },
-  input: {
-    width: '100%',
-    padding: '10px 14px',
-    borderRadius: '8px',
-    border: '1px solid #ddd',
+    marginBottom: '8px',
+    color: 'var(--text-h)',
+    fontWeight: '600',
     fontSize: '14px',
-    boxSizing: 'border-box',
-  },
-  button: {
-    width: '100%',
-    padding: '12px',
-    backgroundColor: '#1a1a2e',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '16px',
-    cursor: 'pointer',
-    marginTop: '8px',
   },
   error: {
-    backgroundColor: '#ffe0e0',
-    color: '#cc0000',
-    padding: '10px',
+    backgroundColor: 'rgba(255, 51, 75, 0.1)',
+    color: 'var(--accent)',
+    border: '1px solid rgba(255, 51, 75, 0.2)',
+    padding: '12px',
     borderRadius: '8px',
-    marginBottom: '16px',
+    marginBottom: '20px',
     textAlign: 'center',
+    fontSize: '14px',
   },
 }
 

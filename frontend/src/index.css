@@ -1,23 +1,27 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+:root {
+  --bg: #09090b;
+  --sidebar-bg: #121214;
+  --card-bg: #18181b;
+  --text: #a1a1aa;
+  --text-h: #ffffff;
+  --border: #27272a;
+  --code-bg: #1e1e24;
+  --accent: #ff334b;
+  --accent-hover: #ff556a;
+  --accent-bg: rgba(255, 51, 75, 0.12);
+  --accent-border: rgba(255, 51, 75, 0.4);
+  --social-bg: rgba(255, 255, 255, 0.05);
+  --shadow: rgba(0, 0, 0, 0.5) 0 10px 30px -10px;
+
+  --sans: 'Outfit', system-ui, -apple-system, sans-serif;
+  --heading: 'Outfit', system-ui, -apple-system, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
-  font: 18px/145% var(--sans);
+  font: 16px/145% var(--sans);
   letter-spacing: 0.18px;
-  color-scheme: light dark;
+  color-scheme: dark;
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
@@ -26,27 +30,7 @@
   -moz-osx-font-smoothing: grayscale;
 
   @media (max-width: 1024px) {
-    font-size: 16px;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
+    font-size: 15px;
   }
 }
 
@@ -125,4 +109,277 @@ table {
     box-sizing: border-box;
   }
 }
+
+/* Spotify-style UI Utilities */
+.spotify-btn {
+  padding: 12px 24px;
+  background-color: var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+  border: none;
+  border-radius: 500px; /* Pill-shaped */
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.spotify-btn:hover {
+  background-color: var(--accent-hover);
+  transform: scale(1.03);
+}
+
+.spotify-btn:active {
+  transform: scale(0.98);
+}
+
+.spotify-btn:disabled {
+  background-color: #27272a;
+  color: #71717a;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.spotify-input {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: #121214;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.spotify-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background-color: #1c1c1f;
+  box-shadow: 0 0 0 2px rgba(255, 51, 75, 0.2);
+}
+
+.spotify-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease;
+}
+
+.spotify-sidebar-btn {
+  padding: 12px 16px;
+  background-color: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.spotify-sidebar-btn:hover {
+  color: var(--text-h);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.spotify-sidebar-btn.active {
+  color: #ffffff;
+  background-color: var(--accent-bg);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+}
+
+/* Global Spotify-Theme Overrides for Modules */
+
+/* Headers & Titles */
+.usuarios-title, .bodega-title, .taller-title, .transporte-title, .reportes-title, .modal-title {
+  color: var(--text-h) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.5px !important;
+}
+
+.bodega-subtitle {
+  color: var(--text) !important;
+}
+
+/* Tab buttons */
+.bodega-tab, .taller-tab {
+  background-color: #27272a !important;
+  color: var(--text) !important;
+  border-radius: 500px !important;
+  font-weight: 600 !important;
+  padding: 8px 18px !important;
+  transition: all 0.2s !important;
+}
+.bodega-tab:hover, .taller-tab:hover {
+  background-color: #3f3f46 !important;
+  color: var(--text-h) !important;
+}
+.bodega-tab-activo, .taller-tab-activo {
+  background-color: var(--accent) !important;
+  color: #ffffff !important;
+  border-radius: 500px !important;
+  font-weight: 600 !important;
+  padding: 8px 18px !important;
+}
+
+/* Action Buttons (New/Save/Cancel) */
+.usuarios-btn-nuevo, .bodega-btn-nuevo, .taller-btn-nuevo, .transporte-btn-nuevo, .btn-guardar {
+  background-color: var(--accent) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  border-radius: 500px !important;
+  padding: 10px 24px !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease-in-out !important;
+}
+.usuarios-btn-nuevo:hover, .bodega-btn-nuevo:hover, .taller-btn-nuevo:hover, .transporte-btn-nuevo:hover, .btn-guardar:hover {
+  background-color: var(--accent-hover) !important;
+  transform: scale(1.03) !important;
+}
+
+.btn-cancelar {
+  background-color: transparent !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 500px !important;
+  padding: 10px 24px !important;
+  font-weight: 600 !important;
+  transition: all 0.2s !important;
+}
+.btn-cancelar:hover {
+  color: var(--text-h) !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Edit / Status Action Buttons */
+.btn-editar {
+  background-color: #d97706 !important; /* Premium Amber */
+  color: #ffffff !important;
+  border-radius: 500px !important;
+  padding: 6px 14px !important;
+  font-weight: 600 !important;
+  transition: all 0.2s !important;
+}
+.btn-editar:hover {
+  transform: scale(1.05) !important;
+}
+
+.btn-desactivar, .btn-salida {
+  background-color: var(--accent) !important;
+  color: #ffffff !important;
+  border-radius: 500px !important;
+  padding: 6px 14px !important;
+  font-weight: 600 !important;
+  transition: all 0.2s !important;
+}
+.btn-desactivar:hover, .btn-salida:hover {
+  background-color: var(--accent-hover) !important;
+  transform: scale(1.05) !important;
+}
+
+.btn-activar {
+  background-color: #10b981 !important; /* Emerald Green */
+  color: #ffffff !important;
+  border-radius: 500px !important;
+  padding: 6px 14px !important;
+  font-weight: 600 !important;
+  transition: all 0.2s !important;
+}
+.btn-activar:hover {
+  transform: scale(1.05) !important;
+}
+
+/* Tables */
+.usuarios-table, .bodega-table, .taller-table, .transporte-table, .reportes-table {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--shadow) !important;
+  overflow: hidden !important;
+}
+
+.usuarios-th, .bodega-th, .taller-th, .transporte-th, .reportes-th {
+  background-color: var(--sidebar-bg) !important;
+  color: var(--text-h) !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid var(--border) !important;
+  padding: 16px !important;
+}
+
+.usuarios-tr, .bodega-tr, .taller-tr, .transporte-tr, .reportes-tr {
+  border-bottom: 1px solid var(--border) !important;
+  transition: background-color 0.2s !important;
+}
+.usuarios-tr:hover, .bodega-tr:hover, .taller-tr:hover, .transporte-tr:hover, .reportes-tr:hover {
+  background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+.usuarios-td, .bodega-td, .taller-td, .transporte-td, .reportes-td {
+  color: var(--text) !important;
+  padding: 14px 16px !important;
+}
+
+/* Modals */
+.overlay {
+  background-color: rgba(0, 0, 0, 0.75) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+.modal {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--shadow) !important;
+  padding: 32px !important;
+}
+
+/* Form fields in modals */
+.field-label {
+  color: var(--text-h) !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+}
+
+.field-input, .bodega-filtro {
+  background-color: #121214 !important;
+  border: 1px solid var(--border) !important;
+  color: #ffffff !important;
+  border-radius: 4px !important;
+  padding: 12px 16px !important;
+  transition: all 0.2s !important;
+}
+.field-input:focus, .bodega-filtro:focus {
+  border-color: var(--accent) !important;
+  background-color: #1c1c1f !important;
+  box-shadow: 0 0 0 2px rgba(255, 51, 75, 0.2) !important;
+}
+
+/* Status Badges */
+.estado-activo, .stock-ok {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+  color: #10b981 !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  font-weight: 600 !important;
+}
+
+.estado-inactivo, .stock-bajo {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+  color: #ef4444 !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  font-weight: 600 !important;
+}
+
 
