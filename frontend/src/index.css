@@ -344,6 +344,8 @@ table {
   border-radius: 16px !important;
   box-shadow: var(--shadow) !important;
   padding: 32px !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
 }
 
 /* Form fields in modals */
