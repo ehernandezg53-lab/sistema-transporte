@@ -3,7 +3,7 @@ from apps.users.models import Rol, Usuario
 
 
 class Command(BaseCommand):
-    help = 'Crea los roles y usuarios iniciales del sistema'
+    help = 'Crea roles y usuarios iniciales para el sistema de transporte'
 
     def handle(self, *args, **options):
         # ── Crear Roles ──
@@ -13,16 +13,16 @@ class Command(BaseCommand):
             rol, created = Rol.objects.get_or_create(nombre_rol=nombre)
             roles[nombre] = rol
             if created:
-                self.stdout.write(self.style.SUCCESS(f'  ✅ Rol creado: {nombre}'))
+                self.stdout.write(self.style.SUCCESS(f'  [OK] Rol creado: {nombre}'))
             else:
-                self.stdout.write(f'  ℹ️  Rol ya existe: {nombre}')
+                self.stdout.write(f'  [INFO] Rol ya existe: {nombre}')
 
         # ── Crear Usuarios ──
         usuarios_data = [
             {
                 'correo': 'admin@transporte.gt',
                 'nombre': 'Carlos Administrador',
-                'password': 'Admin2026!',
+                'password': 'Admin2025!',
                 'rol': 'Administrador',
                 'is_staff': True,
                 'is_superuser': True,
@@ -30,40 +30,37 @@ class Command(BaseCommand):
             {
                 'correo': 'bodega@transporte.gt',
                 'nombre': 'María Bodega',
-                'password': 'Bodega2026!',
+                'password': 'Bodega2025!',
                 'rol': 'Bodega',
             },
             {
                 'correo': 'taller@transporte.gt',
-                'nombre': 'José Taller',
-                'password': 'Taller2026!',
+                'nombre': 'Juan Taller',
+                'password': 'Taller2025!',
                 'rol': 'Taller',
             },
             {
                 'correo': 'logistica@transporte.gt',
                 'nombre': 'Ana Logística',
-                'password': 'Logistica2026!',
+                'password': 'Logistica2025!',
                 'rol': 'Logística de Transporte',
             },
         ]
 
         for data in usuarios_data:
-            correo = data['correo']
-            if Usuario.objects.filter(correo=correo).exists():
-                self.stdout.write(f'  ℹ️  Usuario ya existe: {correo}')
-                continue
+            if not Usuario.objects.filter(correo=data['correo']).exists():
+                user = Usuario.objects.create_user(
+                    correo=data['correo'],
+                    nombre=data['nombre'],
+                    password=data['password'],
+                    rol=roles[data['rol']],
+                    is_staff=data.get('is_staff', False),
+                    is_superuser=data.get('is_superuser', False),
+                )
+                self.stdout.write(self.style.SUCCESS(
+                    f'  [OK] Usuario creado: {data["correo"]} (Rol: {data["rol"]})'
+                ))
+            else:
+                self.stdout.write(f'  [INFO] Usuario ya existe: {data["correo"]}')
 
-            usuario = Usuario.objects.create_user(
-                correo=correo,
-                nombre=data['nombre'],
-                password=data['password'],
-                rol=roles[data['rol']],
-                is_staff=data.get('is_staff', False),
-                is_superuser=data.get('is_superuser', False),
-            )
-            self.stdout.write(self.style.SUCCESS(
-                f'  ✅ Usuario creado: {correo} | Rol: {data["rol"]} | Password: {data["password"]}'
-            ))
-
-        self.stdout.write('')
-        self.stdout.write(self.style.SUCCESS('🎉 Datos iniciales cargados correctamente.'))
+        self.stdout.write(self.style.SUCCESS('\n[SUCCESS] Seed completado exitosamente.'))
