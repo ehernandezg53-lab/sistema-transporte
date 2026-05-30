@@ -28,6 +28,14 @@ class Command(BaseCommand):
                 'is_superuser': True,
             },
             {
+                'correo': 'admin2@transporte.com',
+                'nombre': 'Administrador Dos',
+                'password': 'minino123',
+                'rol': 'Administrador',
+                'is_staff': True,
+                'is_superuser': True,
+            },
+            {
                 'correo': 'bodega@transporte.gt',
                 'nombre': 'María Bodega',
                 'password': 'Bodega2025!',
@@ -48,7 +56,8 @@ class Command(BaseCommand):
         ]
 
         for data in usuarios_data:
-            if not Usuario.objects.filter(correo=data['correo']).exists():
+            user_filter = Usuario.objects.filter(correo=data['correo'])
+            if not user_filter.exists():
                 user = Usuario.objects.create_user(
                     correo=data['correo'],
                     nombre=data['nombre'],
@@ -61,6 +70,15 @@ class Command(BaseCommand):
                     f'  [OK] Usuario creado: {data["correo"]} (Rol: {data["rol"]})'
                 ))
             else:
-                self.stdout.write(f'  [INFO] Usuario ya existe: {data["correo"]}')
+                user = user_filter.first()
+                user.nombre = data['nombre']
+                user.set_password(data['password'])
+                user.rol = roles[data['rol']]
+                user.is_staff = data.get('is_staff', False)
+                user.is_superuser = data.get('is_superuser', False)
+                user.save()
+                self.stdout.write(self.style.SUCCESS(
+                    f'  [OK] Contraseña y datos sincronizados para: {data["correo"]}'
+                ))
 
         self.stdout.write(self.style.SUCCESS('\n[SUCCESS] Seed completado exitosamente.'))
