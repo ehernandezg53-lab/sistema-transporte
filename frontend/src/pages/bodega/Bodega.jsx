@@ -448,7 +448,7 @@ const Bodega = () => {
       {vistaActual === 'rollos' && (
         <>
           <div className="bodega-header">
-            <h3 className="bodega-subtitle">Rollos de Tela</h3>
+            <h3 className="bodega-subtitle">Rollos de Alambre</h3>
             <button className="bodega-btn-nuevo" onClick={() => { setEditandoRollo(null); setFormRollo({ peso: '', estado: 'activo', ubicacion_id: '' }); setShowModalRollo(true); }}>
               + Registrar Rollo
             </button>

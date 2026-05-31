@@ -174,9 +174,9 @@ const Reportes = () => {
           </div>
         </div>
 
-        {/* Rollos de Tela por estado */}
+        {/* Rollos de Alambre por estado */}
         <div className="chart-card">
-          <h4>🧵 Distribución de Rollos de Tela</h4>
+          <h4>🔗 Distribución de Rollos de Alambre</h4>
           <div className="progress-container">
             <div className="progress-item">
               <div className="progress-label">
