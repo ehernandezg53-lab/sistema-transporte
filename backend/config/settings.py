@@ -58,12 +58,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-import dj_database_url
-
 DATABASES = {
-    'default': dj_database_url.config(
-        default='postgresql://postgres:admin123@localhost:5432/sistema_transporte'
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME':     config('DB_NAME',     default='sistema_transporte'),
+        'USER':     config('DB_USER',     default='postgres'),
+        'PASSWORD': config('DB_PASSWORD', default='admin123'),
+        'HOST':     config('DB_HOST',     default='localhost'),
+        'PORT':     config('DB_PORT',     default='5432'),
+    }
 }
 
 REST_FRAMEWORK = {
