@@ -58,7 +58,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+import os
 import dj_database_url
+
+database_url = os.environ.get('DATABASE_URL')
+if database_url:
+    from urllib.parse import urlparse
+    try:
+        parsed = urlparse(database_url)
+        print(f"DEBUG: DATABASE_URL is set in environment. Scheme: {parsed.scheme}, Host: {parsed.hostname}, Port: {parsed.port}")
+    except Exception as e:
+        print(f"DEBUG: DATABASE_URL is set but failed to parse: {e}")
+else:
+    print("DEBUG: DATABASE_URL is NOT set in environment!")
+    print(f"DEBUG: All environment variables present: {list(os.environ.keys())}")
 
 DATABASES = {
     'default': dj_database_url.config(
